@@ -1,0 +1,7 @@
+.env
+node_modules
+dist
+
+src/testing-stuff
+roadmap.md
+/generated/prisma
