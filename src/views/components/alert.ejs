@@ -1,0 +1,29 @@
+<div
+  role="alert"
+  class="rounded-md border <%= alert.border %> <%= alert.bg %> p-4 shadow-sm"
+>
+  <div class="flex items-start gap-4">
+    <span class="flex items-center">
+      <i
+        class="size-6 text-center leading-none <%= alert.icon %> <%= alert.color %> bg-transparent text-sm p-1 border rounded-full"
+      ></i>
+    </span>
+
+    <div class="flex-1 <%= alert.color %>">
+      <strong class="font-medium"> <%= alert.title %> </strong>
+      <p class="mt-0.5 text-sm">
+        <%- alert.message.replace(/\r\n/g, '<br />') %>
+      </p>
+    </div>
+
+    <button
+      class="-m-3 text-center leading-none rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+      type="button"
+      aria-label="Dismiss alert"
+      onclick="this.closest('[role=alert]').remove()"
+    >
+      <span class="sr-only">Dismiss popup</span>
+      <i class="fa fa-solid fa-times"></i>
+    </button>
+  </div>
+</div>

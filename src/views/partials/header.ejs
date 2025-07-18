@@ -1,0 +1,32 @@
+<header
+  class="font-roboto shadow-2xl shadow-blue-200 flex flex-wrap w-full gap-10 justify-evenly p-8 dark:bg-slate-950 dark:text-amber-50"
+>
+  <a href="/" class="flex flex-1 justify-center items-center">
+    <img src="/images/logo.png" class="img h-20" alt="logo" />
+    <h1 class="font-bold text-5xl">Odin Drive</h1>
+  </a>
+  <ul
+    class="flex-1 content-center flex gap-4 justify-center items-center text-xl font-bold"
+  >
+      <% if (locals.currentUser) { %>
+        <li class="hover:bg-violet-700 px-3 py-1 rounded-sm">
+          <a href="/drive">My drive</a>
+        </li>
+        <li class="hover:bg-violet-700 px-3 py-1 rounded-sm">
+          <a href="/account/logout">Logout</a>
+        </li>
+    <% } else { %>
+        <li class="hover:bg-violet-700 px-3 py-1 rounded-sm">
+          <a href="/account/login">Login</a>
+        </li>
+        <li class="hover:bg-violet-700 px-3 py-1 rounded-sm">
+          <a href="/account/signup">Signup</a>
+        </li>
+        <li class="hover:bg-violet-700 px-3 py-1 rounded-sm">
+          <a href="https://github.com/danielvelkov/odin-file-uploader">
+            <i class="fab fa-github"></i>
+          </a>
+        </li>
+    <% } %>
+  </ul>
+</header>

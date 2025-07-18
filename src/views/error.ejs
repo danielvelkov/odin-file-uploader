@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <%- include('./partials/head.ejs', {title}) %>
+  <body class="h-screen flex flex-col">
+    <%- include('./partials/header.ejs') %>
+    <main class="grow-1 content-center bg-linear-to-b from-violet-300 to-blue-200">
+        <section class="flex flex-col gap-3 text-center">
+            <h1 class="text-8xl font-extrabold "><%= statusCode %> </h1>
+            <h2 class="text-3xl">
+                <%= title %>
+            </h2>  
+            <p class="text-lg"><%- error %></p>
+            <a href="/">
+                <button class="bg-violet-500 font-bold text-white px-3 py-2 rounded-sm hover:bg-violet-700"> Back To Home Page</button>
+            </a>
+        </section>
+    </main>
+  </body>
+</html>

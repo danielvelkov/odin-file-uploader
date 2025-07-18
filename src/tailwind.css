@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/forms';
 
 @theme {
   --font-roboto: 'Roboto';
@@ -12,4 +13,17 @@
     font-display: swap;
     src: url('/fonts/Roboto-Regular.ttf') format('truetype');
   }
+}
+.error::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  background-image: url('/icons/red-alert.svg');
+  background-size: 12px 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-sizing: content-box;
+  overflow: hidden;
+  vertical-align: middle;
 }
