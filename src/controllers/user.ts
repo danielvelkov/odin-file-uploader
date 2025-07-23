@@ -90,11 +90,19 @@ export const postSignup = [
       try {
         const hashedPassword = await hashPassword(req.body.password);
 
-        await prisma.user.create({
+        const user = await prisma.user.create({
           data: {
             email: req.body.email,
             password: hashedPassword,
           },
+        });
+
+        await prisma.folder.createMany({
+          data: [
+            { name: 'Documents', owner_id: user.id, parentFolderId: null },
+            { name: 'Images', owner_id: user.id, parentFolderId: null },
+            { name: 'Downloads', owner_id: user.id, parentFolderId: null },
+          ],
         });
 
         res.redirect('/');

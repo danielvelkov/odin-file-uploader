@@ -3,6 +3,7 @@ import prisma from '../db/client';
 import passport from 'passport';
 import { Strategy as LocalStrategy, VerifyFunction } from 'passport-local';
 import { validPassword } from '../util/passwordUtils';
+import { NextFunction, Request, Response } from 'express';
 
 const verify: VerifyFunction = async (email, password, done) => {
   try {
@@ -52,3 +53,17 @@ passport.deserializeUser(async (id, done) => {
     done(error);
   }
 });
+
+/**
+ * Login Required middleware.
+ */
+export const isAuthenticated = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/account/login');
+};

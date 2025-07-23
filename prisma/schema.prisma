@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -15,8 +9,45 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  email String @unique
-  password String 
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+
+  files File[]
+  folders Folder[]
 }
 
+model session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+}
+
+model Folder {
+  id Int @id @default(autoincrement())
+  name String
+  parentFolderId Int? 
+  parentFolder Folder? @relation("FolderHierarchy", fields: [parentFolderId], references: [id])
+  subfolders Folder[] @relation("FolderHierarchy")
+  files File[] @relation("FilesInFolder")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner_id Int
+  user User @relation(fields: [owner_id], references: [id])
+}
+
+model File {
+  id Int @id @default(autoincrement())
+  name String
+  ext String // The file extension like: '.png'
+  path String // The URL or the path to the local directory
+  size Int // In bytes
+  parentFolderId Int 
+  parentFolder Folder @relation("FilesInFolder",fields: [parentFolderId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner_id Int
+  user User @relation(fields: [owner_id], references: [id])
+}

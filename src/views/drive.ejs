@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('./partials/head.ejs', {title }) %>
+  <body class="flex flex-col md:h-screen bg-gradient-to-b from-violet-300 to-blue-200 ">
+    <%- include('./partials/header.ejs') %>
+
+    <% if (locals.alerts) { %>
+        <ul class="flex flex-col gap-5 fixed right-2 top-2 slide-out">
+
+            <% locals.alerts.forEach(alert => { %>
+                <li>
+                    <%- include('./components/alert.ejs', {alert}) %>
+                </li>
+            <% }) %>
+        </ul>
+    <% } %>
+
+    <div class="lg:px-[10vw] flex flex-col md:col-span-full md:grid md:grid-cols-4 md:grid-rows-[auto_3fr_1fr] gap-3 p-3">
+        <aside class="max-h-[70vmax] py-3 px-5 flex flex-col gap-3 bg-violet-200 border border-violet-100 md:col-span-1 md:row-span-1">
+            <h2 class="text-2xl font-medium">
+                <span class="truncate">
+                    <%= locals.currentUser.email.split('@')[0] %>
+                </span>
+                's drive
+            </h2>
+            <hr>
+
+            <ul class="flex flex-col gap-2 overflow-y-auto pr-2">
+                <% if (locals.folders) { %>
+                 
+                    <% folders.forEach(folder => { %>
+                        <li>
+                            <%- include('./components/folderListItem.ejs', {folder}) %>
+                        </li>
+                    <% }) %>
+                <% } %>
+                <li>
+                    <div
+                    class="flex items-center  justify-between w-full border-b bg-gray-100 hover:bg-gray-300 rounded px-2 py-1"
+                    >
+                        <div role="button" id="addFolderButton" class="w-full flex items-center gap-2 justify-center">
+                            <span>Add Folder</span>
+                        <i class="fa fa-plus"></i>
+                        </div>
+                        <form id="addFolderForm" class="max-w-full flex flex-wrap items-center gap-2" hidden action="/drive/folder/create" method="post">
+                            <input placeholder="New Folder Name..." type="text" maxlength="20" name="folder" class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400" >
+                            <div class="flex-1 flex gap-3">
+
+                            <button type="submit" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-green-500" >
+                                <i class="fa fa-solid fa-check"></i>
+                            </button>
+                            <button type="button" id="closeFolderForm" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-red-500">
+                                <i class="fa fa-solid fa-times"></i>
+                            </button>
+                            </div>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </aside>
+        <main class="flex flex-col gap-5 md:col-start-2 md:row-span-full md:col-span-3">
+
+            <nav class="bg-violet-200 border border-violet-100 px-10 py-5 rounded flex flex-wrap justify-between items-center gap-5">
+                <div id="breadcrumbs" class="font-semibold">
+                    <% if (locals.currentFolder) { %>
+                        <a href="/drive">
+                            <u>Root</u>
+                        </a>
+                        <!-- TODO: This is WIP  -->
+                        > ... >
+                        <% for(let currentDir = currentFolder.parentFolder; currentDir; currentDir = currentDir.parentFolder) { %>
+                            <a href="/drive/folder/<%= currentDir.id %>">
+                                <u>
+                                    <%= currentDir.name %>
+                                </u>
+                            </a>
+                            >
+                        <% } %>
+
+                        <span >
+                           <%= currentFolder.name %> 
+                        </span>
+
+                    <% } %>
+                </div>
+                <form class="flex flex-wrap gap-2 items-center">
+                    <input class="grow border rounded-lg px-3 py-2" type="search" placeholder="Search file...">
+                    <button class=" grow rounded-md bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
+            </nav>
+            
+            <ul class="flex flex-wrap gap-5 overflow-y-auto content-start">
+                <% if (locals.currentFolder) { %>
+                    <% if (currentFolder.parentFolder) { %>
+                        <li>
+                            <a href="/drive/folder/<%= currentFolder.parentFolder.id %>" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                                <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
+                                    <i class="fa fa-solid fa-up-long text-gray-500 text-2xl"></i>
+                                </div>
+                                <span class="font-medium text-xs text-center">...</span>
+                            </a>
+                        </li>
+                    <% } else { %>
+
+                        <li>
+                            <a href="/drive" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                                <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
+                                    <i class="fa fa-solid fa-angle-left text-gray-500 text-2xl"></i>
+                                </div>
+                                <span class="font-medium text-xs text-center">Go back</span>
+                            </a>
+                        </li>
+                    <% }  %>
+                    
+                    <li>
+                        <div onclick="document.getElementById('fileInput').click();" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                            <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
+                                <i class="fa fa-upload text-gray-500 text-2xl"></i>
+                            </div>
+                            <span class="font-medium text-xs text-center">Upload file</span>
+                            <form id="fileUploadForm" action="/drive/upload" method="post" enctype="multipart/form-data">
+                                <input id="fileInput" name="file" type="file" hidden onchange="document.getElementById('fileUploadForm').submit()">
+                            </form>
+                        </div>
+                    </li>
+                    <% } else { %>
+                        <% locals.folders.forEach(folder => { %>
+
+                            <li>
+                                <%- include('./components/folderCard.ejs', {folder}) %>
+                            </li>
+                        <% }) %>
+                    <% } %> 
+            </ul>
+        </main>
+    </div>
+    <script defer type="module" src="/js/drive.js"></script>
+  </body>
+</html>

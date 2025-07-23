@@ -5,9 +5,11 @@ import livereload from 'livereload';
 import connectLivereload from 'connect-livereload';
 import homeRouter from './routes/homeRouter';
 import userRouter from './routes/userRouter';
+import driveRouter from './routes/driveRouter';
 import path from 'path';
 import 'dotenv/config';
 import passport from 'passport';
+import methodOverride from 'method-override';
 import { Pool } from 'pg';
 import { CipherKey } from 'crypto';
 import globalHttpStatusErrorHandler from './middleware/globalHttpStatusErrorHandler';
@@ -20,6 +22,8 @@ const pool = new Pool({
 });
 
 const app = express();
+
+app.use(methodOverride('_method'));
 
 if (process.env.NODE_ENV === 'development') {
   const liveReloadServer = livereload.createServer();
@@ -70,6 +74,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/drive', driveRouter);
 app.use('/account', userRouter);
 app.use('/', homeRouter);
 

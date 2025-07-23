@@ -27,3 +27,19 @@
   overflow: hidden;
   vertical-align: middle;
 }
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.slide-out {
+  animation: slideOut 0.5s ease-in forwards;
+  animation-delay: 10s;
+}
