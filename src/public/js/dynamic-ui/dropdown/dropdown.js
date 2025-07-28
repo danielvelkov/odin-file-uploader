@@ -42,8 +42,10 @@ export default class Dropdown extends HTMLElement {
     const icon = document.createElement('span');
     icon.setAttribute('class', 'icon');
     icon.setAttribute('tabindex', 0);
+    icon.setAttribute('aria-label', 'Open dropdown');
 
     const img = document.createElement('img');
+    img.setAttribute('aria-label', 'Menu bar');
     img.src = '/icons/bars.svg';
     icon.appendChild(img);
 

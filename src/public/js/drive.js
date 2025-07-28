@@ -1,19 +1,40 @@
-import Dropdown from './dynamic-ui/dropdown/dropdown.js';
-import DropDownAction from './dynamic-ui/dropdown/dropdown-action.js';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+function cancelEditSelectedFromClick(type) {
+  document.getElementById(`add-${type}-form`).hidden = true;
+  document.getElementById(`add-${type}-button`).toggleAttribute('hidden');
+}
 
-customElements.define('drop-down', Dropdown);
-customElements.define('drop-down-action', DropDownAction);
+function startEditFromClick(type) {
+  document.getElementById(`add-${type}-form`).removeAttribute('hidden');
+  document.getElementById(`add-${type}-button`).toggleAttribute('hidden');
+}
 
-const addFolderButton = document.getElementById('addFolderButton');
-const addFolderForm = document.getElementById('addFolderForm');
-const closeFolderForm = document.getElementById('closeFolderForm');
+function handleUpdateFormKeydown(event, type, id) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    cancelEditSelectedFromOptions(event, type, id);
+  }
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    document.getElementById(`update-${type}-form-${id}`).submit();
+  }
+}
 
-addFolderButton.addEventListener('click', () => {
-  addFolderForm.removeAttribute('hidden');
-  addFolderButton.toggleAttribute('hidden');
-});
+function cancelEditSelectedFromOptions(event, type, id) {
+  event.preventDefault();
+  document.getElementById(`update-${type}-form-${id}`).hidden = true;
+  document.getElementById(`${type}-nav-button-${id}`).toggleAttribute(`hidden`);
+  document.getElementById(`${type}-options-${id}`).toggleAttribute(`hidden`);
+}
 
-closeFolderForm.addEventListener('click', () => {
-  addFolderForm.hidden = true;
-  addFolderButton.toggleAttribute('hidden');
-});
+function startEditFromOptions(event, type, id) {
+  event.preventDefault();
+  const form = document.getElementById(`update-${type}-form-${id}`);
+  form.removeAttribute(`hidden`);
+  document.getElementById(`${type}-nav-button-${id}`).toggleAttribute(`hidden`);
+  document.getElementById(`${type}-options-${id}`).toggleAttribute(`hidden`);
+  const input = form.querySelector(`input`);
+  const length = input.value.length;
+  input.focus();
+  input.setSelectionRange(length, length);
+}

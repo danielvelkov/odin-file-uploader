@@ -30,7 +30,18 @@
                  
                     <% folders.forEach(folder => { %>
                         <li>
-                            <%- include('./components/folderListItem.ejs', {folder}) %>
+                            <%- include('./components/item-with-actions', {
+                                type: 'folder',
+                                item: folder,
+                                displayName: 'Folder',
+                                iconClass: 'fa fa-folder',
+                                inputName: 'folder',
+                                linkHref: `/drive/folder/${folder.id}`,
+                                linkTitle: `Open folder ${folder.name}`,
+                                updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                                deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                                deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                            }) %>
                         </li>
                     <% }) %>
                 <% } %>
@@ -38,18 +49,21 @@
                     <div
                     class="flex items-center  justify-between w-full border-b bg-gray-100 hover:bg-gray-300 rounded px-2 py-1"
                     >
-                        <div role="button" id="addFolderButton" class="w-full flex items-center gap-2 justify-center">
+                        <div role="button" id="add-folder-button" onclick="startEditFromClick('folder');" class="w-full flex items-center gap-2 justify-center">
                             <span>Add Folder</span>
                         <i class="fa fa-plus"></i>
                         </div>
-                        <form id="addFolderForm" class="max-w-full flex flex-wrap items-center gap-2" hidden action="/drive/folder/create" method="post">
-                            <input placeholder="New Folder Name..." type="text" maxlength="20" name="folder" class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400" >
+                        <form id="add-folder-form" class="max-w-full flex flex-wrap items-center gap-2" hidden action="/drive/folder/create" method="post">
+                            <label class="sr-only" for="add-folder-name">Folder name:</label>
+                            <input id="add-folder-name" placeholder="New Folder Name..." type="text" maxlength="20" name="folder" class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400" >
                             <div class="flex-1 flex gap-3">
 
-                            <button type="submit" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-green-500" >
+                            <button type="submit" aria-label="Confirm button"
+                             class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-green-500" >
                                 <i class="fa fa-solid fa-check"></i>
                             </button>
-                            <button type="button" id="closeFolderForm" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-red-500">
+                            <button type="button" aria-label="Cancel button" onclick="cancelEditSelectedFromClick('folder')"
+                            id="close-folder-form-button" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-red-500">
                                 <i class="fa fa-solid fa-times"></i>
                             </button>
                             </div>
@@ -64,23 +78,25 @@
                 <div id="breadcrumbs" class="font-semibold">
                     <% if (locals.currentFolder) { %>
                         <a href="/drive">
-                            <u>Root</u>
+                            <u>My drive</u>
                         </a>
-                        <!-- TODO: This is WIP  -->
-                        > ... >
+                        > 
+                        <% if (!locals.folders.some(f=> f.id === locals.currentFolder.id)) { %>
+                            ... >
+                        <% } %>
                         <% for(let currentDir = currentFolder.parentFolder; currentDir; currentDir = currentDir.parentFolder) { %>
                             <a href="/drive/folder/<%= currentDir.id %>">
                                 <u>
-                                    <%= currentDir.name %>
+                                    <%- currentDir.name %>
                                 </u>
                             </a>
                             >
                         <% } %>
-
                         <span >
-                           <%= currentFolder.name %> 
+                           <%- currentFolder.name %> 
                         </span>
-
+                    <% } else { %>
+                        <span>My drive</span>
                     <% } %>
                 </div>
                 <form class="flex flex-wrap gap-2 items-center">
@@ -97,9 +113,9 @@
                         <li>
                             <a href="/drive/folder/<%= currentFolder.parentFolder.id %>" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
                                 <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
-                                    <i class="fa fa-solid fa-up-long text-gray-500 text-2xl"></i>
+                                    <i class="fa fa-solid fa-angle-left text-gray-500 text-2xl"></i>
                                 </div>
-                                <span class="font-medium text-xs text-center">...</span>
+                                <span class="font-medium text-xs text-center">Go back</span>
                             </a>
                         </li>
                     <% } else { %>
@@ -113,6 +129,39 @@
                             </a>
                         </li>
                     <% }  %>
+
+                    <% currentFolder.subfolders?.forEach(folder => { %>
+                        <li>
+                            <%- include('./components/card-with-actions', {
+                                type: 'folder',
+                                item: folder,
+                                iconClass: 'fa fa-folder',
+                                displayName: 'Folder',
+                                inputName: 'folder',
+                                linkHref: `/drive/folder/${folder.id}`,
+                                linkTitle: `See folder details for ${folder.name}`,
+                                updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                                deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                                deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                            }) %>
+                        </li>
+                    <% }) %>
+                    <% currentFolder.files.forEach(file => { %>
+                        <li>
+                            <%- include('./components/card-with-actions', {
+                                type: 'file',
+                                item: file,
+                                iconClass: 'fa fa-file',
+                                displayName: 'File',
+                                inputName: 'file',
+                                linkHref: `/drive/folder/${currentFolder.id}/file/${file.id}`,
+                                linkTitle: `See file details for ${file.name}`,
+                                updateAction: `/drive/folder/${currentFolder.id}/file/${file.id}?_method=PUT`,
+                                deleteAction: `/drive/folder/${currentFolder.id}/file/${file.id}?_method=DELETE`,
+                                deleteConfirmMessage: `Are you sure you want to delete the file /${file.name} ?\r\nThis action cannot be undone.`
+                            }) %>
+                        </li>
+                    <% }) %>
                     
                     <li>
                         <div onclick="document.getElementById('fileInput').click();" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
@@ -120,22 +169,91 @@
                                 <i class="fa fa-upload text-gray-500 text-2xl"></i>
                             </div>
                             <span class="font-medium text-xs text-center">Upload file</span>
-                            <form id="fileUploadForm" action="/drive/upload" method="post" enctype="multipart/form-data">
-                                <input id="fileInput" name="file" type="file" hidden onchange="document.getElementById('fileUploadForm').submit()">
+                            <form id="fileUploadForm" action="/drive/folder/<%= locals.currentFolder.id %>/upload" method="post" enctype="multipart/form-data">
+                                <input id="fileInput" name="file" type="file" hidden onchange="this.closest('form').submit()">
                             </form>
                         </div>
                     </li>
-                    <% } else { %>
+
+                    <li>
+
+                        <div
+                        class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow"
+                        >
+                            <div role="button" id="add-subdir-button" onclick="startEditFromClick('subdir');">
+                                <div  class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
+                                    <i class="fa fa fa-plus text-gray-500 text-2xl"></i>
+                                </div>
+                                <span class="font-medium text-xs text-center">Add directory</span>
+                            </div>
+                            <form id="add-subdir-form" class="max-w-full flex flex-wrap items-center gap-2" hidden action="/drive/folder/<%= currentFolder.id %>/create" method="post">
+                                <label class="sr-only" for="add-subdir-name">Folder name:</label>
+                                <input id="add-subdir-name" placeholder="New Folder Name..." type="text" maxlength="20" name="folder" class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400" >
+                                <div class="flex-1 flex gap-3">
+
+                                <button type="submit" aria-label="Confirm button"
+                                class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-green-500" >
+                                    <i class="fa fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" aria-label="Cancel button" onclick="cancelEditSelectedFromClick('subdir')"
+                                id="close-subdir-form-button" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-red-500">
+                                    <i class="fa fa-solid fa-times"></i>
+                                </button>
+                                </div>
+                            </form>
+                        </div>
+                    </li>
+                    <% } else if(locals.folders && locals.folders.length > 0) { %>
                         <% locals.folders.forEach(folder => { %>
 
                             <li>
-                                <%- include('./components/folderCard.ejs', {folder}) %>
+                                <%- include('./components/card-with-actions', {
+                                    type: 'subdir',
+                                    item: folder,
+                                    displayName: 'Folder',
+                                    iconClass: 'fa fa-folder',
+                                    inputName: 'folder',
+                                    linkHref: `/drive/folder/${folder.id}`,
+                                    linkTitle: `Open folder ${folder.name}`,
+                                    updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                                    deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                                    deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                                }) %>
                             </li>
                         <% }) %>
-                    <% } %> 
+                    <% } else { %> 
+                    <li>
+                        <div
+                        class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow"
+                        >
+                            <div role="button" id="add-subdir-button" onclick="startEditFromClick('subdir');">
+                                <div  class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
+                                    <i class="fa fa fa-plus text-gray-500 text-2xl"></i>
+                                </div>
+                                <span class="font-medium text-xs text-center">Add directory</span>
+                            </div>
+                            <form id="add-subdir-form" class="max-w-full flex flex-wrap items-center gap-2" hidden action="/drive/folder/create" method="post">
+                                <label class="sr-only" for="add-subdir-name">Folder name:</label>
+                                <input id="add-subdir-name" placeholder="New Folder Name..." type="text" maxlength="20" name="folder" class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400" >
+                                <div class="flex-1 flex gap-3">
+
+                                <button type="submit" aria-label="Confirm button"
+                                class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-green-500" >
+                                    <i class="fa fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" aria-label="Cancel button" onclick="cancelEditSelectedFromClick('subdir')"
+                                id="close-subdir-form-button" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-red-500">
+                                    <i class="fa fa-solid fa-times"></i>
+                                </button>
+                                </div>
+                            </form>
+                        </div>
+                    </li>
+                    <% } %>
             </ul>
         </main>
     </div>
-    <script defer type="module" src="/js/drive.js"></script>
+    <script type="module" src="/js/imports.js"></script>
+    <script defer src="/js/drive.js"></script>
   </body>
 </html>

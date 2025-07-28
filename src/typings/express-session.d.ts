@@ -1,4 +1,5 @@
 import 'express-session';
+import { Alert } from '../util/Alert';
 
 declare module 'express-session' {
   interface SessionData {
@@ -6,5 +7,6 @@ declare module 'express-session' {
      * Set by passport.js authenticate(). Contains all auth error for the current session.
      */
     messages?: string[];
+    alerts: Alert[];
   }
 }

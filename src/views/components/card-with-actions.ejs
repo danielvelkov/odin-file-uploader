@@ -1,0 +1,122 @@
+<div class="position relative h-full">
+  <a
+    aria-label="<%= displayName %> <%= item.name %>"
+    href="<%= linkHref %>"
+    title="<%= linkTitle %>"
+    class="h-full w-35 rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-200 p-4 flex flex-col gap-2 items-center transition-shadow"
+  >
+
+    <!-- Item icon -->
+    <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+        <% if (item.ext) { %>
+            <% if (['.png','.jpeg','.webp','.bnp', '.gif', '.svg'].includes(item.ext) ) { %>
+                <i class="fa fa-image text-gray-500 text-3xl"></i>
+            <% } else if (['.doc','.docx','.pdf','.txt'].includes(item.ext) ) { %>
+                <i class="fa fa-file-alt text-gray-500 text-3xl"></i> 
+            <% } else { %>
+                <i class="fa fa-file text-gray-500 text-3xl"></i>
+            <% } %>
+        <% } else { %>
+            <i class="<%= iconClass %> text-gray-500 text-3xl"></i>
+        <% } %>
+    </div>
+
+    <!-- Item details -->
+    <div class="w-full text-center">
+      <span
+        id="<%= type %>-nav-button-<%= item.id %>"
+        class="font-semibold text-gray-800 text-sm break-words line-clamp-2"
+      >
+        <%- item.name %>
+
+        <!-- Size and ext  -->
+        <div class="text-xs text-gray-500 flex justify-between mt-1">
+        <% if (item.ext) { %>
+            <span><%= item.ext %></span>
+        <% } %>
+        <% if (item.size) { %>
+            <span>
+                <% if (item.size < 1024) { %>
+                    <%= item.size.toFixed(2) %> B
+                <% } else if (item.size < Math.pow(1024,2)) { %>
+                    <%= (item.size / 1024).toFixed(2) %> KB
+                <% } else if (item.size < Math.pow(1024,3)) { %>
+                    <%= (item.size / Math.pow(1024,2)).toFixed(2) %> KB
+                <% } else { %>
+                    <%= (item.size / Math.pow(1024,3)).toFixed(2) %> GB
+                <% } %>
+            </span>
+        <% } %>
+        </div>
+      </span>
+      
+    </div>
+
+    <!-- Rename Form -->
+    <form
+      id="update-<%= type %>-form-<%= item.id %>"
+      class="max-w-full flex flex-wrap items-center gap-2"
+      hidden
+      action="<%= updateAction %>"
+      method="post"
+      autocomplete="off"
+    >
+      <label class="sr-only" for="<%= type %>-name-<%= item.id %>">
+        <%= displayName %> name:
+      </label>
+      <input
+        id="<%= type %>-name-<%= item.id %>"
+        required
+        placeholder="Update name..."
+        type="text"
+        maxlength="20"
+        name="<%= inputName %>"
+        value="<%= type === 'file' ? item.name.replace(/\.[^/.]+$/, "") : item.name %>"
+        class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400"
+        onkeydown="handleUpdateFormKeydown(event, '<%= type %>', '<%= item.id %>')"
+        onclick="event.preventDefault()"
+      />
+      <div class="flex-1 flex gap-3">
+        <button
+          aria-label="Confirm button"
+          type="submit"
+          class="flex-1/2 border border-violet-300 rounded-sm p-1 hover:bg-green-500"
+        >
+          <i class="fa fa-solid fa-check"></i>
+        </button>
+        <button
+          aria-label="Cancel button"
+          type="button"
+          class="flex-1/2 border border-violet-300 rounded-sm p-1 hover:bg-red-500"
+          onclick="cancelEditSelectedFromOptions(event, '<%= type %>', '<%= item.id %>')"
+        >
+          <i class="fa fa-solid fa-times"></i>
+        </button>
+      </div>
+    </form>
+  </a>
+
+  <!-- Options dropdown -->
+  <div
+    id="<%= type %>-options-<%= item.id %>"
+    class="hover:bg-gray-400 p-1 rounded absolute top-0 right-0 z-50"
+  >
+    <drop-down id="<%= type %>-button-<%= item.id %>">
+      <drop-down-action class="bg-gray-100 shadow-md">
+        <a onclick="startEditFromOptions(event, '<%= type %>', '<%= item.id %>')">
+          Rename...
+        </a>
+      </drop-down-action>
+      <drop-down-action class="bg-gray-100 shadow-md">
+        <form
+          id="delete-<%= type %>-form-<%= item.id %>"
+          action="<%= deleteAction %>"
+          method="post"
+          onsubmit="return confirm(`<%= deleteConfirmMessage %>`)"
+        >
+          <button type="submit">Delete...</button>
+        </form>
+      </drop-down-action>
+    </drop-down>
+  </div>
+</div>
