@@ -4,10 +4,10 @@
   <body class="h-screen flex flex-col">
     <%- include('./partials/header.ejs') %>
     <main class="grow-1 bg-linear-to-b from-violet-300 to-blue-200">
-      <div class="mx-auto max-w-2xl py-32 sm:py-48">
+      <div class="mx-auto max-w-2xl py-16 sm:py-20">
         <div class="text-center">
           <h1
-            class="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-7xl"
+            class="text-5xl font-semibold tracking-tight text-balance p-5 text-gray-900 sm:text-7xl"
           >
             <% if (locals.currentUser) { %>
               Welcome back <%= locals.currentUser.email.split('@')[0] %>!
@@ -16,14 +16,14 @@
             <% } %>
           </h1>
           <p
-            class="mt-8 text-lg font-medium text-pretty text-gray-800 sm:text-xl/8"
+            class="mt-5 text-lg p-5 font-medium text-pretty text-gray-800 sm:text-xl/8"
           >
             Save favorite images of fallen enemies and burnt settlements.
             <br />
             Your files will be stored in a secure
             <abbr>VCDC</abbr> (Valhalla Cloud Data Center).
           </p>
-          <div class="mt-10 flex items-center justify-center gap-x-6">
+          <div class="mt-5 flex items-center justify-center gap-x-6">
             <% if (locals.currentUser) { %>
               <a
                 href="/drive"

@@ -26,6 +26,10 @@ export default class Dropdown extends HTMLElement {
       if (e.target !== this) dropDownList.classList.remove('visible');
     });
 
+    document.addEventListener('scroll', () => {
+      dropDownList.classList.remove('visible');
+    });
+
     dropDownList.addEventListener('click', () => {
       this.toggleDropDown();
     });
@@ -64,6 +68,9 @@ export default class Dropdown extends HTMLElement {
       position: fixed;
       border: 1px solid black;
       border-radius: 0.125em;
+      top: 0;
+      left: 0;
+      z-index: 1000;
     } 
 
     .dropdown-list.visible {
@@ -85,6 +92,22 @@ export default class Dropdown extends HTMLElement {
     wrapper.appendChild(this.#dropDownListMenu);
 
     // Add event listener to toggle dropdown visibility
-    wrapper.addEventListener('click', () => this.toggleDropDown());
+    wrapper.addEventListener('click', () => {
+      this.toggleDropDown();
+      const rect = wrapper.getBoundingClientRect();
+      const dropdown = this.#dropDownListMenu;
+      const dropdownWidth = dropdown.offsetWidth;
+      const viewportWidth = window.innerWidth;
+
+      let left = rect.left;
+
+      // If dropdown would overflow to the right, align it to the left edge
+      if (left + dropdownWidth > viewportWidth) {
+        left = viewportWidth - dropdownWidth - 10; // Adjust with margin
+      }
+
+      dropdown.style.top = `${rect.top}px`;
+      dropdown.style.left = `${left}px`;
+    });
   }
 }

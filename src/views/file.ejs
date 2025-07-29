@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <%- include('./partials/head.ejs', {title }) %>
-  <body class="h-screen flex flex-col bg-linear-to-b from-violet-300 to-blue-200">
+  <body class="h-screen flex flex-col bg-blue-200">
     <%- include('./partials/header.ejs') %>
     <main class="grow-1 flex flex-col gap-5 self-center p-5">
         <nav class="bg-violet-200 border border-violet-100 rounded-lg px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-4">
@@ -29,7 +29,7 @@
         </nav>
             <i class="text-gray-600 text-sm">* Downloading doesn't work in firefox. Don't know why. Don't care.</i>
 
-        <div class="w-[max(900px, 100%)] flex flex-col md:flex-row items-start md:items-center justify-center gap-10 rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-200 px-6 py-10">
+        <div class="w-[max(900px, 100%)] h-fit flex flex-col md:flex-row items-start md:items-center justify-center gap-10 rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-200 px-6 py-10">
             <section class="flex flex-col gap-6 text-gray-800">
                 <h2 class="text-lg font-semibold">File Details:</h2>
 
@@ -76,7 +76,7 @@
                 </div>
             </section>
 
-            <div class="flex-1 aspect-square bg-gray-100 rounded-lg flex items-center justify-center shadow text-9xl px-5 py-10">
+            <div class="flex-1 aspect-square invisible bg-gray-100 rounded-lg flex items-center md:visible justify-center shadow text-9xl px-5 py-10">
             <% if (file.ext) { %>
                 <% if (['.png','.jpeg','.webp','.bmp','.gif','.svg'].includes(file.ext)) { %>
                 <i class="fa fa-image text-gray-400 "></i>

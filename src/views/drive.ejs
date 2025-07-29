@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <%- include('./partials/head.ejs', {title }) %>
-  <body class="flex flex-col md:h-screen bg-gradient-to-b from-violet-300 to-blue-200 ">
+  <body class="flex flex-col h-[150vh] md:h-screen bg-blue-200 ">
     <%- include('./partials/header.ejs') %>
 
     <% if (locals.alerts) { %>
@@ -74,12 +74,12 @@
         </aside>
         <main class="flex flex-col gap-5 md:col-start-2 md:row-span-full md:col-span-3">
 
-            <nav class="bg-violet-200 border border-violet-100 px-10 py-5 rounded flex flex-wrap justify-between items-center gap-5">
+            <nav class="bg-violet-200 border border-violet-100 px-5 md:px-10 py-5 rounded flex md:flex-wrap flex-wrap-reverse justify-between items-center gap-5">
                 <div id="breadcrumbs" class="font-semibold">
-                    <% if (locals.currentFolder) { %>
                         <a href="/drive">
                             <u>My drive</u>
                         </a>
+                    <% if (locals.currentFolder) { %>
                         > 
                         <% if (!locals.folders.some(f=> f.id === locals.currentFolder.id)) { %>
                             ... >
@@ -95,23 +95,21 @@
                         <span >
                            <%- currentFolder.name %> 
                         </span>
-                    <% } else { %>
-                        <span>My drive</span>
                     <% } %>
                 </div>
                 <form class="flex flex-wrap gap-2 items-center">
-                    <input class="grow border rounded-lg px-3 py-2" type="search" placeholder="Search file...">
+                    <input class="grow border rounded-lg px-3 py-2 max-w-sm" type="search" placeholder="Search file...">
                     <button class=" grow rounded-md bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white">
                         <i class="fa fa-search"></i>
                     </button>
                 </form>
             </nav>
             
-            <ul class="flex flex-wrap gap-5 overflow-y-auto content-start">
+            <ul class="grid auto-rows-max grid-cols-2 md:grid-cols-4 gap-5 overflow-y-auto content-start custom-col">
                 <% if (locals.currentFolder) { %>
                     <% if (currentFolder.parentFolder) { %>
                         <li>
-                            <a href="/drive/folder/<%= currentFolder.parentFolder.id %>" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                            <a href="/drive/folder/<%= currentFolder.parentFolder.id %>" class="h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
                                 <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
                                     <i class="fa fa-solid fa-angle-left text-gray-500 text-2xl"></i>
                                 </div>
@@ -121,7 +119,7 @@
                     <% } else { %>
 
                         <li>
-                            <a href="/drive" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                            <a href="/drive" class=" h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
                                 <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
                                     <i class="fa fa-solid fa-angle-left text-gray-500 text-2xl"></i>
                                 </div>
@@ -164,7 +162,7 @@
                     <% }) %>
                     
                     <li>
-                        <div onclick="document.getElementById('fileInput').click();" class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                        <div onclick="document.getElementById('fileInput').click();" class=" h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
                             <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
                                 <i class="fa fa-upload text-gray-500 text-2xl"></i>
                             </div>
@@ -178,9 +176,9 @@
                     <li>
 
                         <div
-                        class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow"
+                        class="h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow"
                         >
-                            <div role="button" id="add-subdir-button" onclick="startEditFromClick('subdir');">
+                            <div role="button" class="flex flex-col items-center justify-center w-full h-full" id="add-subdir-button" onclick="startEditFromClick('subdir');">
                                 <div  class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
                                     <i class="fa fa fa-plus text-gray-500 text-2xl"></i>
                                 </div>
@@ -224,7 +222,7 @@
                     <% } else { %> 
                     <li>
                         <div
-                        class="w-32 h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow"
+                        class=" h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow"
                         >
                             <div role="button" id="add-subdir-button" onclick="startEditFromClick('subdir');">
                                 <div  class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">

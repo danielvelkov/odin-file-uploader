@@ -43,3 +43,14 @@
   animation: slideOut 0.5s ease-in forwards;
   animation-delay: 10s;
 }
+
+drop-down,
+drop-down-action {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+}
+.custom-col {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}

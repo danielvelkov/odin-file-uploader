@@ -7,12 +7,14 @@ import fileValidation, {
 } from '../util/fileValidation';
 import { Alert } from '../util/Alert';
 import prisma from '../db/client';
+import { v2 as cloudinary } from 'cloudinary'; //to work set .env var: CLOUDINARY_URL=cloudinary://my_key:my_secret@my_cloud_name
 import { File, Folder, User } from '../../generated/prisma';
 import Error404 from '../util/errors/Error404';
 import path from 'path';
 import mime from 'mime';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
+import fetch from 'node-fetch';
 
 interface FileRequest extends Request {
   fileValidationError?: string;
@@ -196,6 +198,14 @@ export const postFileUpload = [
 
       if (!req.parentFolder) return next(new Error('No folder specified.'));
 
+      const result = await cloudinary.uploader.upload(
+        path.resolve(process.cwd(), req.file.path),
+        {
+          resource_type: 'auto',
+          public_id: path.parse(req.file.path).name,
+        },
+      );
+
       await prisma.file.create({
         data: {
           name: req.file.originalname,
@@ -204,14 +214,18 @@ export const postFileUpload = [
           parentFolderId: req.parentFolder.id,
           owner_id: (req.user as User).id,
           path: req.file.path,
+          cloudinary_public_id: result.public_id,
         },
       });
+
+      await unlink(path.resolve(process.cwd(), req.file.path));
+
       res.redirect(`/drive/folder/${req.parentFolder?.id ?? ''}`);
     } catch (error) {
       // Clean up uploaded file if database save fails
       if (req.file) {
         try {
-          await unlink(req.file.path);
+          await unlink(path.resolve(process.cwd(), req.file.path));
         } catch (unlinkError) {
           console.error('Failed to clean up file:', unlinkError);
         }
@@ -425,15 +439,31 @@ export const deleteFolder = [
         folderForDeletion.id,
       );
 
-      await prisma.folder.delete({
-        where: { id: folderForDeletion?.id },
-      });
-
       // Delete all related files from uploads/
-
       (deletedFiles as File[]).forEach(async (f) => {
         const filePath = path.resolve(process.cwd(), f.path);
         if (existsSync(filePath)) await unlink(filePath);
+
+        if (f.cloudinary_public_id) {
+          const { result } = await cloudinary.uploader.destroy(
+            f.cloudinary_public_id,
+          );
+          if (result !== 'ok') {
+            const alert = new Alert(
+              'error',
+              `Failed to delete file ${f.name}`,
+              '',
+            );
+
+            req.session.alerts = [alert];
+
+            return res.redirect(`/drive/folder/${f.parentFolderId}`);
+          }
+        }
+      });
+
+      await prisma.folder.delete({
+        where: { id: folderForDeletion?.id },
       });
 
       req.session.alerts = [new Alert('success', 'Folder deleted', '')];
@@ -495,6 +525,7 @@ export const updateFolderName = [
         where: { id: folderForUpdate?.id },
         data: {
           name: req.body.folder,
+          updatedAt: new Date(),
         },
       });
 
@@ -564,8 +595,6 @@ export const downloadFile = async (
 
     if (!file) return next(new Error404('File does not exist'));
 
-    const filePath = path.resolve(process.cwd(), file.path);
-
     file.name = file.name.replace(/\.[^/.]+$/, file.ext.toLowerCase());
 
     // Set proper headers
@@ -580,15 +609,20 @@ export const downloadFile = async (
       `attachment; filename="${sanitizedName}"; filename*=UTF-8''${encodedName}`,
     );
 
-    // Use sendFile instead of download for better control
-    res.download(filePath, encodedName, (err) => {
-      if (err) {
-        console.error('Download error:', err);
-        if (!res.headersSent) {
-          next(new Error('Failed to download file'));
-        }
-      }
-    });
+    if (!file.cloudinary_public_id)
+      return next(
+        new Error404(
+          'File not found on server. Delete this item and try to reupload.',
+        ),
+      );
+
+    const result = await cloudinary.api.resource(file.cloudinary_public_id);
+
+    const response = await fetch(result.url);
+
+    if (!response.ok) throw new Error('Failed to fetch server asset.');
+
+    response.body?.pipe(res);
   } catch (error) {
     console.error('Download handler error:', error);
     next(error);
@@ -617,6 +651,22 @@ export const deleteFile = async (
 
     if (!file) return next(new Error404('File does not exist.'));
 
+    if (file.cloudinary_public_id) {
+      const { result } = await cloudinary.uploader.destroy(
+        file.cloudinary_public_id,
+      );
+      if (result !== 'ok') {
+        const alert = new Alert(
+          'error',
+          `Failed to delete file ${file.name}`,
+          'Try again later',
+        );
+
+        req.session.alerts = [alert];
+
+        return res.redirect(`/drive/folder/${parentFolderId}`);
+      }
+    }
     await prisma.file.delete({
       where: {
         id: +id,
@@ -675,6 +725,7 @@ export const updateFileName = [
         where: { id: fileForUpdate.id },
         data: {
           name: req.body.file + fileForUpdate.ext,
+          updatedAt: new Date(),
         },
       });
 
