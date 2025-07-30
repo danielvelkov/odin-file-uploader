@@ -22,25 +22,30 @@ driveRouter.use(isAuthenticated);
 
 driveRouter.use(setDefaultLayout);
 
-driveRouter.get('/', driveController.getDrive);
-driveRouter.post('/folder/:id/upload', driveController.postFileUpload);
-driveRouter.post('/folder/:id/create', driveController.postSubfolderCreate);
-driveRouter.post('/folder/create', driveController.postFolderCreate);
-driveRouter.get('/folder/:id', driveController.getFolder);
-driveRouter.put('/folder/:id', driveController.updateFolderName);
-driveRouter.delete('/folder/:id', driveController.deleteFolder);
+// File related
 driveRouter.get(
   '/folder/:parentFolderId/file/:id/download',
   driveController.downloadFile,
-);
-driveRouter.get('/folder/:parentFolderId/file/:id', driveController.getFile);
-driveRouter.delete(
-  '/folder/:parentFolderId/file/:id',
-  driveController.deleteFile,
 );
 driveRouter.put(
   '/folder/:parentFolderId/file/:id',
   driveController.updateFileName,
 );
+driveRouter.get('/folder/:parentFolderId/file/:id', driveController.getFile);
+driveRouter.post('/folder/:id/upload', driveController.postFileUpload);
+driveRouter.delete(
+  '/folder/:parentFolderId/file/:id',
+  driveController.deleteFile,
+);
+
+// Folder related
+driveRouter.post('/folder/:id/create', driveController.postSubfolderCreate);
+driveRouter.post('/folder/create', driveController.postFolderCreate);
+driveRouter.get('/folder/:id', driveController.getFolder);
+driveRouter.put('/folder/:id', driveController.updateFolderName);
+driveRouter.delete('/folder/:id', driveController.deleteFolder);
+
+driveRouter.get('/search', driveController.getDriveSearch);
+driveRouter.get('/', driveController.getDrive);
 
 export default driveRouter;

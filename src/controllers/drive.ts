@@ -113,6 +113,77 @@ export const getDrive = async (
 };
 
 /**
+ * Displays search results for a given query.
+ * @route GET /drive/search
+ */
+export const getDriveSearch = [
+  check('q')
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage('Please enter a search value.'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { alerts } = req.session;
+      delete req.session.alerts;
+      const { layout, q: searchTerm } = req.query;
+
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        const alerts = errors.array().map((e) => new Alert('error', '', e.msg));
+
+        req.session.alerts = alerts;
+
+        return res.redirect('/drive');
+      }
+
+      if (!searchTerm || !searchTerm?.length)
+        return next(new Error('No search term provided'));
+
+      if (layout) req.session.layoutType = layout as LayoutType;
+
+      const fileResults = await prisma.file.findMany({
+        where: {
+          owner_id: (req.user as User).id,
+          name: {
+            contains: searchTerm as string,
+          },
+        },
+      });
+
+      const folderResults = await prisma.folder.findMany({
+        where: {
+          owner_id: (req.user as User).id,
+          name: {
+            contains: searchTerm as string,
+          },
+        },
+      });
+
+      const rootFolders = await getUserRootFolders(+(req.user as User).id);
+
+      res.render('search', {
+        title: 'Search result for: ' + searchTerm,
+        folders: rootFolders,
+        searchResults: {
+          files: fileResults,
+          folders: folderResults,
+        },
+        alerts: alerts
+          ? alerts.map((a) => new Alert(a.type, a.title, a.message))
+          : [],
+        layout: req.session.layoutType ?? 'grid',
+        searchTerm,
+      });
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  },
+];
+
+/**
  * Upload a file to a folder action.
  * @route POST /drive/folder/:id/upload
  */

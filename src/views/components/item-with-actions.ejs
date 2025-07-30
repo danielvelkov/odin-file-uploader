@@ -51,9 +51,9 @@
   </a>
   <div
     id="<%= type %>-options-<%= item.id %>"
-    class="hover:bg-gray-400 p-1 rounded z-50"
+    class="hover:bg-gray-400 p-1 rounded"
   >
-    <drop-down aria-label="<% type %> options">
+    <drop-down aria-label="<% type %> options" class="z-99">
       <drop-down-action aria-label="Rename" class="bg-gray-100 shadow-md">
         <a
           onclick="startEditFromOptions(event, '<%= type %>', '<%= item.id %>' );"
