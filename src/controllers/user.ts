@@ -90,6 +90,18 @@ export const postSignup = [
         alerts: [errorAlert],
       });
     } else {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: req.body.email,
+        },
+      });
+
+      if (existingUser)
+        return res.render('account/signup', {
+          alerts: [new Alert('error', 'Email is already in use', '')],
+          email: req.body.email,
+        });
+
       try {
         const hashedPassword = await hashPassword(req.body.password);
 

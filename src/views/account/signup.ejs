@@ -25,6 +25,7 @@
                         placeholder="Enter email"
                         name="email"
                         minlength="8"
+                        <%= locals.email ? `value=${locals.email}` : '' %>
                         class="peer border-0 grow focus:ring-0 placeholder-transparent"
                     />
                     <span
