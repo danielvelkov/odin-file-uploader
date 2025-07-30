@@ -6,11 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified yet\"",
     "prepare": "husky",
-    "build": "tsc && tailwindcss -i src/tailwind.css -o src/public/css/style.css",
+    "build": "npm run prisma:generate && tsc && tailwindcss -i src/tailwind.css -o src/public/css/style.css",
     "start": "node dist/server.js",
     "dev": "concurrently \"nodemon --exec 'ts-node' src/server.ts\" \"tailwindcss -i src/tailwind.css -o src/public/css/style.css --watch\"",
     "lint": "eslint 'src/**/*.ts'",
-    "create-session-table": "psql odin_file_uploader < node_modules/connect-pg-simple/table.sql"
+    "prisma:generate": "prisma generate"
   },
   "keywords": [],
   "author": "daniel_velkov <danielvelkov13@gmail.com>",
