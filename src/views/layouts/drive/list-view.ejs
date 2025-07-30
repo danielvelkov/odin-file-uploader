@@ -1,0 +1,72 @@
+<table class="table-auto">
+  <thead class="bg-white border-b-2 border-gray-200 text-gray-600">
+    <th class="px-4 py-2" align="left">NAME</th>
+    <th class="px-4 py-2" align="left">MODIFIED</th>
+    <th align="left">SIZE</th>
+    <th class="px-4 py-2"></th>
+  </thead>
+  <tbody >
+    <% if(locals.currentFolder) {  %>
+
+        <tr class="w-full bg-white border-b-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition">
+            <td colspan="4" class="px-4 py-2" >
+                <a class="flex gap-2 align-middle" href="<%= currentFolder.parentFolder ? `/drive/folder/${currentFolder.parentFolder.id}` : '/drive' %>" >
+                    <i class="text-center text-2xl w-7 fa fa-level-up"></i>
+                    <span class="font-semibold truncate max-w-[10ch] md:max-w-full">
+                        Go back..
+                    </span>
+                </a>
+            </td>
+        </tr>
+
+        <!-- Folders -->
+        <% if (currentFolder.subfolders) { %>
+            <% currentFolder.subfolders.forEach(folder => { %>
+                <%- include('../../components/row-with-actions', {
+                    type: 'subdir',
+                    item: folder,
+                    iconClass: 'fa fa-folder',
+                    displayName: 'Folder',
+                    inputName: 'folder',
+                    linkHref: `/drive/folder/${folder.id}`,
+                    linkTitle: `See folder details for ${folder.name}`,
+                    updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                    deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                    deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                }) %>
+            <% }) %>
+        <% } else { %>
+        <% } %>
+
+        <% currentFolder.files.forEach(file => { %>
+                <%- include('../../components/row-with-actions', {
+                    type: 'file',
+                    item: file,
+                    iconClass: 'fa fa-file',
+                    displayName: 'File',
+                    inputName: 'file',
+                    linkHref: `/drive/folder/${currentFolder.id}/file/${file.id}`,
+                    linkTitle: `See file details for ${file.name}`,
+                    updateAction: `/drive/folder/${currentFolder.id}/file/${file.id}?_method=PUT`,
+                    deleteAction: `/drive/folder/${currentFolder.id}/file/${file.id}?_method=DELETE`,
+                    deleteConfirmMessage: `Are you sure you want to delete the file /${file.name} ?\r\nThis action cannot be undone.`
+                }) %>
+        <% }) %>
+        <% } else if (locals.folders) { %>
+            <% locals.folders.forEach(folder => { %>
+                <%- include('../../components/row-with-actions', {
+                    type: 'subdir',
+                    item: folder,
+                    iconClass: 'fa fa-folder',
+                    displayName: 'Folder',
+                    inputName: 'folder',
+                    linkHref: `/drive/folder/${folder.id}`,
+                    linkTitle: `See folder details for ${folder.name}`,
+                    updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                    deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                    deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                }) %>
+            <% }) %>
+        <% } %>
+  </tbody>
+</table>

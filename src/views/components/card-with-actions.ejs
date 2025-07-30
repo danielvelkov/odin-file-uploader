@@ -7,17 +7,17 @@
   >
 
     <!-- Item icon -->
-    <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+    <div class="w-16 h-16 bg-violet-300 text-violet-700 rounded flex items-center justify-center">
         <% if (item.ext) { %>
             <% if (['.png','.jpeg','.webp','.bnp', '.gif', '.svg'].includes(item.ext) ) { %>
-                <i class="fa fa-image text-gray-500 text-3xl"></i>
+                <i class="fa fa-image  text-3xl"></i>
             <% } else if (['.doc','.docx','.pdf','.txt'].includes(item.ext) ) { %>
-                <i class="fa fa-file-alt text-gray-500 text-3xl"></i> 
+                <i class="fa fa-file-alt text-3xl"></i> 
             <% } else { %>
-                <i class="fa fa-file text-gray-500 text-3xl"></i>
+                <i class="fa fa-file text-3xl"></i>
             <% } %>
         <% } else { %>
-            <i class="<%= iconClass %> text-gray-500 text-3xl"></i>
+            <i class="<%= iconClass %>  text-3xl"></i>
         <% } %>
     </div>
 
@@ -46,6 +46,11 @@
                     <%= (item.size / Math.pow(1024,3)).toFixed(2) %> GB
                 <% } %>
             </span>
+        <% } %>
+        <% if (item.files && item.files.length >0) { %>
+          <span>
+            <%= item.files.length %> files
+          </span>
         <% } %>
         </div>
       </span>

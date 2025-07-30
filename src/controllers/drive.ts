@@ -15,6 +15,7 @@ import mime from 'mime';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import fetch from 'node-fetch';
+import { LayoutType } from '../util/LayoutType';
 
 interface FileRequest extends Request {
   fileValidationError?: string;
@@ -22,10 +23,10 @@ interface FileRequest extends Request {
 }
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function (_req, _file, cb) {
     cb(null, 'uploads/');
   },
-  filename: function (req, file, cb) {
+  filename: function (_req, file, cb) {
     const uniqueId = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const extension = path.extname(file.originalname);
     const filename = `${uniqueId}${extension}`;
@@ -39,7 +40,7 @@ const fileUpload = multer({
     files: 1,
     fileSize: MAX_SIZE,
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const { errors } = fileValidation(file);
 
     if (errors.length > 0) {
@@ -92,6 +93,9 @@ export const getDrive = async (
   try {
     const { alerts } = req.session;
     delete req.session.alerts;
+    const { layout } = req.query;
+
+    if (layout) req.session.layoutType = layout as LayoutType;
 
     const rootFolders = await getUserRootFolders(+(req.user as User).id);
     res.render('drive', {
@@ -100,6 +104,7 @@ export const getDrive = async (
       alerts: alerts
         ? alerts.map((a) => new Alert(a.type, a.title, a.message))
         : [],
+      layout: req.session.layoutType ?? 'grid',
     });
   } catch (error) {
     console.error(error);
@@ -186,12 +191,9 @@ export const postFileUpload = [
           .array()
           .map((e) => new Alert('warning', 'Invalid File', e.msg));
 
-        return res.render('drive', {
-          alerts,
-          title: req.parentFolder?.name || 'My Drive',
-          folders: await getUserRootFolders(+(req.user as User).id),
-          currentFolder: req.parentFolder,
-        });
+        req.session.alerts = alerts;
+
+        return res.redirect(`/drive/folder/${req.parentFolder?.id}`);
       }
 
       if (!req.file) return next(new Error('No file uploaded.'));
@@ -249,6 +251,9 @@ export const getFolder = async (
 
   const { alerts } = req.session;
   delete req.session.alerts;
+  const { layout } = req.query;
+
+  if (layout) req.session.layoutType = layout as LayoutType;
 
   try {
     const folder = await prisma.folder.findFirst({
@@ -272,6 +277,7 @@ export const getFolder = async (
       alerts: alerts
         ? alerts.map((a) => new Alert(a.type, a.title, a.message))
         : [],
+      layout: req.session.layoutType ?? 'grid',
     });
   } catch (error) {
     console.log(error);
@@ -532,7 +538,11 @@ export const updateFolderName = [
       const alert = new Alert('success', 'Folder renamed', '');
       req.session.alerts = [alert];
 
-      return res.redirect(`/drive`);
+      return res.redirect(
+        folderForUpdate.parentFolderId
+          ? `/drive/folder/${folderForUpdate.parentFolderId}`
+          : '/drive',
+      );
     } catch (error) {
       console.log(error);
       next(error);

@@ -1,5 +1,6 @@
 import 'express-session';
 import { Alert } from '../util/Alert';
+import { LayoutType } from '../util/LayoutType';
 
 declare module 'express-session' {
   interface SessionData {
@@ -8,5 +9,6 @@ declare module 'express-session' {
      */
     messages?: string[];
     alerts: Alert[];
+    layoutType?: LayoutType;
   }
 }

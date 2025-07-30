@@ -1,0 +1,108 @@
+<tr class="w-full bg-white border-b-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition">
+  <td class="px-4 py-2" >
+    <a class="flex gap-2 align-middle" href="<%= linkHref %>" 
+      id="<%= type %>-nav-button-<%= item.id %>"
+      >
+      <i class="<%= iconClass %> min-w-8 text-lg text-center text-violet-700 bg-violet-300 p-1.5 rounded-md"></i>
+      <span class="font-semibold truncate max-w-[10ch] md:max-w-full">
+        <%- item.name %>
+      </span>
+    </a>
+
+    <!-- Rename Form -->
+    <form
+      id="update-<%= type %>-form-<%= item.id %>"
+      class="max-w-full flex flex-wrap items-center gap-2"
+      hidden
+      action="<%= updateAction %>"
+      method="post"
+      autocomplete="off"
+    >
+      <label class="sr-only" for="<%= type %>-name-<%= item.id %>">
+        <%= displayName %> name:
+      </label>
+      <input
+        id="<%= type %>-name-<%= item.id %>"
+        required
+        placeholder="Update name..."
+        type="text"
+        maxlength="20"
+        name="<%= inputName %>"
+        value="<%= type === 'file' ? item.name.replace(/\.[^/.]+$/, "") : item.name %>"
+        class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400"
+        onkeydown="handleUpdateFormKeydown(event, '<%= type %>', '<%= item.id %>')"
+        onclick="event.preventDefault()"
+      />
+      <div class="flex-1 flex gap-3">
+        <button
+          aria-label="Confirm button"
+          type="submit"
+          class="flex-1/2 border border-violet-300 rounded-sm p-1 hover:bg-green-500"
+        >
+          <i class="fa fa-solid fa-check"></i>
+        </button>
+        <button
+          aria-label="Cancel button"
+          type="button"
+          class="flex-1/2 border border-violet-300 rounded-sm p-1 hover:bg-red-500"
+          onclick="cancelEditSelectedFromOptions(event, '<%= type %>', '<%= item.id %>')"
+        >
+          <i class="fa fa-solid fa-times"></i>
+        </button>
+      </div>
+    </form>
+    </td>
+
+    <!-- Updated at -->
+    <td class="text-gray-500"><%- item.updatedAt.toDateString() %></td>
+
+    <!-- Size or number of files -->
+    <td class="text-gray-500">
+    <% if (item.files && item.files.length >0) { %>
+        <span>
+        <%= item.files.length %> files
+        </span>
+    <% } else if (item.size) { %>
+        <span>
+            <% if (item.size < 1024) { %>
+                <%= item.size.toFixed(2) %> B
+            <% } else if (item.size < Math.pow(1024,2)) { %>
+                <%= (item.size / 1024).toFixed(2) %> KB
+            <% } else if (item.size < Math.pow(1024,3)) { %>
+                <%= (item.size / Math.pow(1024,2)).toFixed(2) %> KB
+            <% } else { %>
+                <%= (item.size / Math.pow(1024,3)).toFixed(2) %> GB
+            <% } %>
+        </span>
+    <% } else { %>
+        <span>—</span>
+    <% } %>
+    </td>
+
+    <td class="px-2">
+        <div
+            id="<%= type %>-options-<%= item.id %>"
+            class="hover:bg-gray-400 p-1 rounded z-50 w-fit"
+        >
+            <drop-down aria-label="<% type %> options">
+                <drop-down-action aria-label="Rename" class="bg-gray-100 shadow-md">
+                    <a
+                    onclick="startEditFromOptions(event, '<%= type %>', '<%= item.id %>' );"
+                    >
+                    Rename...
+                    </a>
+                </drop-down-action>
+                <drop-down-action aria-label="Delete" class="bg-gray-100 shadow-md">
+                    <form
+                    id="delete-<%= type %>-form-<%= item.id %>"
+                    action="<%= deleteAction %>"
+                    method="post"
+                    onsubmit="return confirm(`<%= deleteConfirmMessage %>`)"
+                    >
+                    <button type="submit">Delete...</button>
+                    </form>
+                </drop-down-action>
+            </drop-down>
+        </div>
+    </td>
+</tr>

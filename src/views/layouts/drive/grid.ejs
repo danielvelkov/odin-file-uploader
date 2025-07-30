@@ -1,0 +1,81 @@
+<ul class="grid auto-rows-max grid-cols-2 md:grid-cols-4 gap-5 overflow-y-auto content-start custom-col">
+    <% if (locals.currentFolder) { %>
+            <li>
+                <a href="<%= currentFolder.parentFolder ? `/drive/folder/${currentFolder.parentFolder.id}` : '/drive' %>" class="h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-100 p-4 flex flex-col items-center justify-center cursor-pointer transition-shadow">
+                    <div class="w-16 h-16 bg-gray-100 rounded flex flex-col items-center justify-center gap-2">
+                        <i class="fa fa-solid fa-level-up text-gray-500 text-2xl"></i>
+                    </div>
+                    <span class="font-medium text-xs text-center">Go back</span>
+                </a>
+            </li>
+
+        <!-- Subfolders     -->
+        <% currentFolder.subfolders?.forEach(folder => { %>
+            <li>
+                <%- include('../../components/card-with-actions', {
+                    type: 'folder',
+                    item: folder,
+                    iconClass: 'fa fa-folder',
+                    displayName: 'Folder',
+                    inputName: 'folder',
+                    linkHref: `/drive/folder/${folder.id}`,
+                    linkTitle: `See folder details for ${folder.name}`,
+                    updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                    deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                    deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                }) %>
+            </li>
+        <% }) %>
+        <!-- Files     -->
+        <% currentFolder.files.forEach(file => { %>
+            <li>
+                <%- include('../../components/card-with-actions', {
+                    type: 'file',
+                    item: file,
+                    iconClass: 'fa fa-file',
+                    displayName: 'File',
+                    inputName: 'file',
+                    linkHref: `/drive/folder/${currentFolder.id}/file/${file.id}`,
+                    linkTitle: `See file details for ${file.name}`,
+                    updateAction: `/drive/folder/${currentFolder.id}/file/${file.id}?_method=PUT`,
+                    deleteAction: `/drive/folder/${currentFolder.id}/file/${file.id}?_method=DELETE`,
+                    deleteConfirmMessage: `Are you sure you want to delete the file /${file.name} ?\r\nThis action cannot be undone.`
+                }) %>
+            </li>
+        <% }) %>
+        
+        <% } else if(locals.folders && locals.folders.length > 0) { %>
+            <% locals.folders.forEach(folder => { %>
+                <li>
+                    <%- include('../../components/card-with-actions', {
+                        type: 'subdir',
+                        item: folder,
+                        displayName: 'Folder',
+                        iconClass: 'fa fa-folder',
+                        inputName: 'folder',
+                        linkHref: `/drive/folder/${folder.id}`,
+                        linkTitle: `Open folder ${folder.name}`,
+                        updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                        deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                        deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                    }) %>
+                </li>
+            <% }) %>
+        <% } else { %> 
+        <li class="col-span-full">
+            <div
+            class=" h-full w-full rounded-lg bg-white border border-violet-100 p-20 flex flex-col gap-2 items-center justify-center "
+            >
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fa fa-folder text-3xl text-gray-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-600">
+                    Your drive is empty.
+                </h2>
+                <p class="text-gray-500 text-lg text-center">
+                    Get started by creating a new folder and uploading some files.
+                </p>
+            </div>
+        </li>
+        <% } %>
+</ul>

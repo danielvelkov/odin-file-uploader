@@ -10,6 +10,7 @@ import path from 'path';
 import 'dotenv/config';
 import passport from 'passport';
 import methodOverride from 'method-override';
+import useragent from 'express-useragent';
 import { Pool } from 'pg';
 import { CipherKey } from 'crypto';
 import globalHttpStatusErrorHandler from './middleware/globalHttpStatusErrorHandler';
@@ -23,6 +24,7 @@ const pool = new Pool({
 
 const app = express();
 
+app.use(useragent.express());
 app.use(methodOverride('_method'));
 
 if (process.env.NODE_ENV === 'development') {
