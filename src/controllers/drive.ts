@@ -190,6 +190,25 @@ export const getDriveSearch = [
 export const postFileUpload = [
   (req: FileRequest, res: Response, next: NextFunction) => {
     fileUpload.single('file')(req, res, async (err) => {
+      const { id } = req.params;
+
+      const folder = await prisma.folder.findFirst({
+        where: {
+          id: +id,
+          owner_id: +(req.user as User).id,
+        },
+        include: {
+          files: true,
+          subfolders: true,
+          parentFolder: true,
+        },
+      });
+
+      // Handle no folder
+      if (!folder) return next(new Error404('Folder does not exist'));
+
+      req.parentFolder = folder;
+
       if (err) {
         // Handle different types of multer errors
         if (err.code === 'LIMIT_FILE_SIZE') {
@@ -207,28 +226,10 @@ export const postFileUpload = [
         return next();
       }
 
-      const file = req.file;
-
-      // Handle Folder not existing OR file existing with the same name
       try {
-        const { id } = req.params;
+        const file = req.file;
 
-        const folder = await prisma.folder.findFirst({
-          where: {
-            id: +id,
-            owner_id: +(req.user as User).id,
-          },
-          include: {
-            files: true,
-            subfolders: true,
-            parentFolder: true,
-          },
-        });
-
-        if (!folder) return next(new Error404('Folder does not exist'));
-
-        req.parentFolder = folder;
-
+        // handle file existing with the same name
         if (
           folder.files.some(
             (f) =>
