@@ -27,6 +27,9 @@ const userValidationChain = [
     .withMessage(
       'Field must contain a lowercase letter, a number and be at least 8 characters long',
     ),
+  body('confirm-password')
+    .custom((value, { req }) => value === req.body.password)
+    .withMessage('Confirm password does not match entered password.'),
 ];
 
 /**

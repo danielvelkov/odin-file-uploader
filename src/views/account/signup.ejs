@@ -61,6 +61,29 @@
                     </span>
                     <span class="error h-[5ch] absolute -bottom-[5ch] px-0.5 text-sm text-red-500 invisible peer-valid:invisible" aria-live="polite">
                 </label>
+
+                <label for="Confirm-Password" class="relative flex border rounded border-gray-300 shadow-sm focus-within:border-violet-600  has-[.error:not(.invisible)]:border-red-500 has-valid:border-green-500 ">
+                    <input
+                        autocomplete="new-password"
+                        required
+                        type="password"
+                        id="Confirm-Password"
+                        placeholder="Enter confirm password"
+                        name="confirm-password"
+                        minlength="8"
+                        pattern="(?=.*[a-z])(?=.*\d).{8,}"
+                        class="peer border-0 grow focus:ring-0 placeholder-transparent"
+                    />
+                    <span
+                        class="absolute bg-white inset-y-2 start-3 -translate-y-5 px-0.5 text-sm font-medium text-gray-500 transition-transform peer-placeholder-shown:translate-y-0 peer-focus:-translate-y-5"
+                    >
+                        Confirm Password*
+                    </span>
+                    <span class="flex items-center px-1 invisible peer-valid:visible">
+                        <i class="fa fa-solid fa-check bg-green-500 text-white text-sm border p-1 rounded-full"></i>
+                    </span>
+                    <span class="error h-[5ch] absolute -bottom-[5ch] px-0.5 text-sm text-red-500 invisible peer-valid:invisible" aria-live="polite">
+                </label>
                 <span class="text-sm text-gray-500">
                     Password should be at least 8 characters including a number and a lowercase letter. 
                 </span>
