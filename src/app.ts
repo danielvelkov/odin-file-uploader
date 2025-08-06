@@ -1,5 +1,6 @@
 import express, { Request } from 'express';
 import session from 'express-session';
+import compression from 'compression';
 import connectPgSimple from 'connect-pg-simple';
 import livereload from 'livereload';
 import connectLivereload from 'connect-livereload';
@@ -24,6 +25,7 @@ const pool = new Pool({
 });
 
 const app = express();
+app.use(compression());
 
 app.use(useragent.express());
 app.use(methodOverride('_method'));
