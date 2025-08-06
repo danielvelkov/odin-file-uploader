@@ -266,39 +266,47 @@ export const getSharedFolderSearch = [
 
       if (layout) req.session.layoutType = layout as LayoutType;
 
-      let fileResults = await prisma.file.findMany({
-        where: {
-          owner_id: (res.locals.sharedFolderOwner as User).id,
-          name: {
-            contains: searchTerm as string,
+      // Get all descendant folder IDs
+      const descendantFolderIds = await prisma.$queryRaw<Array<{ id: number }>>`
+        WITH RECURSIVE folder_tree AS (
+          SELECT id FROM "Folder" WHERE id = ${res.locals.sharedFolder.folderId}
+          
+          UNION ALL
+          
+          SELECT f.id
+          FROM "Folder" f
+          JOIN folder_tree ft ON f."parentFolderId" = ft.id
+        )
+        SELECT id FROM folder_tree
+      `;
+
+      const folderIdSet = new Set(descendantFolderIds.map((f) => f.id));
+
+      const [fileResults, folderResults] = await Promise.all([
+        prisma.file.findMany({
+          where: {
+            owner_id: (res.locals.sharedFolderOwner as User).id,
+            parentFolderId: {
+              in: Array.from(folderIdSet),
+            },
+            name: {
+              contains: searchTerm as string,
+            },
           },
-        },
-      });
+        }),
 
-      let folderResults = await prisma.folder.findMany({
-        where: {
-          owner_id: (res.locals.sharedFolderOwner as User).id,
-          name: {
-            contains: searchTerm as string,
+        prisma.folder.findMany({
+          where: {
+            owner_id: (res.locals.sharedFolderOwner as User).id,
+            id: {
+              in: Array.from(folderIdSet),
+            },
+            name: {
+              contains: searchTerm as string,
+            },
           },
-        },
-      });
-
-      fileResults = fileResults.filter(
-        async (f) =>
-          await isFolderSomewhereWithinParent(
-            res.locals.sharedFolder.folderId,
-            f.parentFolderId,
-          ),
-      );
-
-      folderResults = folderResults.filter(
-        async (f) =>
-          await isFolderSomewhereWithinParent(
-            res.locals.sharedFolder.folderId,
-            f.id,
-          ),
-      );
+        }),
+      ]);
 
       const viewModel = createUserSearchResultsViewModel({
         title: `Search results for: ${searchTerm}`,
