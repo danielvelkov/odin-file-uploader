@@ -1,4 +1,6 @@
 <tr class="w-full bg-white border-b-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition">
+
+  <!-- Item details -->
   <td class="px-4 py-2" >
     <a class="flex gap-2 align-middle" href="<%= linkHref %>" 
       id="<%= type %>-nav-button-<%= item.id %>"
@@ -80,6 +82,9 @@
     </td>
 
     <td class="px-2">
+
+      <% if (locals.showOptions) { %>
+        <!-- Dropdown options -->
         <div
             id="<%= type %>-options-<%= item.id %>"
             class="hover:bg-gray-400 p-1 rounded z-50 w-fit"
@@ -104,5 +109,6 @@
                 </drop-down-action>
             </drop-down>
         </div>
+        <% } %>
     </td>
 </tr>

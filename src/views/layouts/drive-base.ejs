@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head.ejs', { title }) %>
+  <body class="flex flex-col h-[150vh] md:h-screen bg-blue-200">
+    <%- include('../partials/header.ejs') %>
+
+    <!-- Alerts -->
+    <% if (locals.alerts) { %>
+        <ul class="flex flex-col gap-5 fixed right-2 top-2 slide-out">
+            <% alerts.forEach(alert => { %>
+                <li>
+                    <%- include('../components/alert.ejs', {alert}) %>
+                </li>
+            <% }) %>
+        </ul>
+    <% } %>
+
+    <div class="lg:px-[10vw] flex flex-col md:col-span-full md:grid md:grid-cols-4 md:grid-rows-[auto_3fr_1fr] gap-3 p-3">
+        
+        <!-- Sidebar -->
+        <% if (locals.sidebar) { %>
+            <%- sidebar %>
+        <% } %>
+
+        <!-- Main Content -->
+        <main class="flex flex-col gap-5 md:col-start-2 md:row-span-full md:col-span-3">
+            <% if (locals.mainContent) { %>
+                <%- mainContent %>
+            <% } %>
+        </main>
+    </div>
+
+    <!-- Dialog -->
+    <% if (locals.dialog) { %>
+        <%- dialog %>
+    <% } %>
+
+    <script type="module" src="/js/imports.js"></script>
+    <script defer src="/js/drive.js"></script>
+  </body>
+</html>

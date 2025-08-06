@@ -7,6 +7,7 @@
         <nav class="bg-violet-200 border border-violet-100 rounded-lg px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-4">
             <h1 class="text-xl font-bold text-gray-800"><%= file.name %></h1>
             <ul class="flex gap-3 flex-wrap">
+            <% if( !locals.accessType || locals.accessType && accessType === 'PREVIEW_DOWNLOAD') { %>
                 <li>
                     <a href="/drive/folder/<%= file.parentFolderId %>/file/<%= file.id %>/download" download>
                     <button class="rounded-md bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-medium text-white shadow">
@@ -14,6 +15,8 @@
                     </button>
                     </a>
                 </li>
+            <% } %>
+            <% if( !locals.accessType ) { %>
                 <li>
                     <form
                     action="/drive/folder/<%= file.parentFolderId %>/file/<%= file.id %>?_method=DELETE"
@@ -25,6 +28,7 @@
                         </button>
                     </form>
                 </li>
+            <% } %>
             </ul>
         </nav>
             <i class="text-gray-600 text-sm">* Downloading doesn't work in firefox. Don't know why. Don't care.</i>
@@ -35,7 +39,8 @@
 
                 <div class="space-y-1">
                     <p class="font-medium">Location</p>
-                    <a class="inline-block px-2 py-0.5 border border-gray-50 rounded-sm bg-gray-200 hover:bg-gray-400" href="/drive/folder/<%= file.parentFolder.id %>">
+                    <a class="inline-block px-2 py-0.5 border border-gray-50 rounded-sm bg-gray-200 hover:bg-gray-400"
+                     href="<%= locals.accessType ? `/public/${sharedFolder.id}/folder/${file.parentFolder.id}` : `/drive/folder/${file.parentFolderId}` %>">
                         <%= file.parentFolder.name %>
                     </a>
                 </div>

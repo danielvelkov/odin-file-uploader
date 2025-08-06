@@ -1,0 +1,65 @@
+<aside class="max-h-[70vmax] hidden md:flex py-3 px-5 flex-col gap-3 bg-violet-200 border border-violet-100 md:col-span-1 md:row-span-1">
+    <h2 class="text-xl font-medium">
+        <% if (sidebar.sharedFolder) { %>
+        <span class="truncate max-w-[10ch]">
+            Shared Folder
+        </span>
+        <% } else if (sidebar.currentUser) { %>
+        <span class="truncate">
+            <%= sidebar.currentUser.email.split('@')[0] %>
+        </span>
+        's drive
+        <% }  %>
+    </h2>
+    
+    <hr>
+
+    <ul class="flex flex-col gap-2 overflow-y-auto pr-2">
+        <% if (sidebar.features.showRootFolders && sidebar.rootFolders) { %>
+            
+            <% sidebar.rootFolders.forEach(folder => { %>
+                <li>
+                    <%- include('../../components/item-with-actions', {
+                        type: 'folder',
+                        item: folder,
+                        displayName: 'Folder',
+                        iconClass: 'fa fa-folder',
+                        inputName: 'folder',
+                        linkHref: `/drive/folder/${folder.id}`,
+                        linkTitle: `Open folder ${folder.name}`,
+                        updateAction: `/drive/folder/${folder.id}?_method=PUT`,
+                        deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
+                        deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                    }) %>
+                </li>
+            <% }) %>
+        <% } %>
+        <% if (sidebar.features.showCreateRootFolder) { %>
+            <li>
+                <div
+                class="flex items-center  justify-between w-full border-b bg-gray-100 hover:bg-gray-300 rounded px-2 py-1"
+                >
+                    <div role="button" id="add-folder-button" onclick="startEditFromClick('folder');" class="w-full flex items-center gap-2 justify-center">
+                        <span>Add Root Folder</span>
+                    <i class="fa fa-plus"></i>
+                    </div>
+                    <form id="add-folder-form" class="max-w-full flex flex-wrap items-center gap-2" hidden action="<%= sidebar.actions.createRootFolder %>" method="post">
+                        <label class="sr-only" for="add-folder-name">Folder name:</label>
+                        <input id="add-folder-name" placeholder="New Folder Name..." type="text" maxlength="20" name="folder" class="shrink flex-1 max-w-[100%] border rounded-sm border-gray-400" >
+                        <div class="flex-1 flex gap-3">
+
+                        <button type="submit" aria-label="Confirm button"
+                        class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-green-500" >
+                            <i class="fa fa-solid fa-check"></i>
+                        </button>
+                        <button type="button" aria-label="Cancel button" onclick="cancelEditSelectedFromClick('folder')"
+                        id="close-folder-form-button" class="flex-1/2 border border-violet-400 rounded-sm p-1 hover:bg-red-500">
+                            <i class="fa fa-solid fa-times"></i>
+                        </button>
+                        </div>
+                    </form>
+                </div>
+            </li>
+        <% } %>
+    </ul>
+</aside>

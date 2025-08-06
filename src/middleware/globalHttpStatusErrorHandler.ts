@@ -20,6 +20,18 @@ const globalHttpStatusErrorHandler = (
       title: 'Unauthorized',
       error: message || 'Unauthorized access',
     });
+  else if (statusCode === 403)
+    res.status(403).render('error', {
+      statusCode,
+      title: 'Forbidden',
+      error: message || 'Permission denied',
+    });
+  else if (statusCode === 410)
+    res.status(410).render('error', {
+      statusCode,
+      title: 'Gone',
+      error: message || 'Resource is no longer valid',
+    });
   else {
     console.error(err);
     res.status(500).render('error', {

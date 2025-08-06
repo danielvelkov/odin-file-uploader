@@ -1,9 +1,9 @@
-<div class="position relative h-full">
+<div class="relative h-full">
   <a
     aria-label="<%= displayName %> <%= item.name %>"
     href="<%= linkHref %>"
     title="<%= linkTitle %>"
-    class="h-full rounded-lg shadow-md hover:shadow-xl bg-white border border-violet-200 p-4 flex flex-col gap-2 items-center transition-shadow"
+    class="h-full rounded-lg shadow-md hover:shadow-xl bg-white hover:bg-gray-100 border border-violet-200 p-4 flex flex-col gap-2 items-center transition-shadow"
   >
 
     <!-- Item icon -->
@@ -102,26 +102,28 @@
   </a>
 
   <!-- Options dropdown -->
-  <div
-    id="<%= type %>-options-<%= item.id %>"
-    class="hover:bg-gray-400 p-1 rounded absolute top-0 right-0 z-50"
-  >
-    <drop-down id="<%= type %>-button-<%= item.id %>">
-      <drop-down-action class="bg-gray-100 shadow-md">
-        <a onclick="startEditFromOptions(event, '<%= type %>', '<%= item.id %>')">
-          Rename...
-        </a>
-      </drop-down-action>
-      <drop-down-action class="bg-gray-100 shadow-md">
-        <form
-          id="delete-<%= type %>-form-<%= item.id %>"
-          action="<%= deleteAction %>"
-          method="post"
-          onsubmit="return confirm(`<%= deleteConfirmMessage %>`)"
-        >
-          <button type="submit">Delete...</button>
-        </form>
-      </drop-down-action>
-    </drop-down>
-  </div>
+  <% if (locals.showOptions) { %>
+    <div
+      id="<%= type %>-options-<%= item.id %>"
+      class="hover:bg-gray-400 p-1 rounded absolute top-0 right-0"
+    >
+      <drop-down id="<%= type %>-button-<%= item.id %>">
+        <drop-down-action class="bg-gray-100 shadow-md">
+          <a onclick="startEditFromOptions(event, '<%= type %>', '<%= item.id %>')">
+            Rename...
+          </a>
+        </drop-down-action>
+        <drop-down-action class="bg-gray-100 shadow-md">
+          <form
+            id="delete-<%= type %>-form-<%= item.id %>"
+            action="<%= deleteAction %>"
+            method="post"
+            onsubmit="return confirm(`<%= deleteConfirmMessage %>`)"
+          >
+            <button type="submit">Delete...</button>
+          </form>
+        </drop-down-action>
+      </drop-down>
+    </div>
+  <% } %>
 </div>

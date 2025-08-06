@@ -1,0 +1,27 @@
+<dialog id="<%= dialog.id %>" class="open:fixed open:m-auto open:inset-0" <%= dialog.isOpen ? 'open' : '' %> closedby="any">
+    <div class="fixed inset-0 bg-black/50"></div>
+    <div class="grid place-content-center relative z-50 ">
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg relative">
+            <h2 id="<%= dialog.id %>-title" class="text-xl font-bold text-gray-900 sm:text-2xl">
+                <%= dialog.title %>
+            </h2>
+
+            <div class="mt-4">
+                <%- dialog.content %>
+            </div>
+
+            <% if(dialog.showCloseButton) { %>
+                <div class="absolute top-4 right-4">
+                    <button
+                        onclick="document.getElementById('<%= dialog.id %>').close();"
+                        type="button"
+                        class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-white bg-gray-100 hover:bg-gray-600 rounded-full transition-colors duration-200 shadow-md"
+                        aria-label="Close dialog"
+                    >
+                        <i class="fa fa-times text-lg"></i>
+                    </button>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</dialog>

@@ -1,24 +1,29 @@
 <ul class="grid auto-rows-max grid-cols-2 md:grid-cols-4 gap-5 overflow-y-auto content-start custom-col">
-    <% if (locals.searchResults) { %>
-        <!-- Folders     -->
-        <% searchResults.folders?.forEach(folder => { %>
+
+    <!-- Folders -->
+    <% if(grid.folders) { %>
+        <% grid.folders.forEach(folder => { %>
             <li>
                 <%- include('../../components/card-with-actions', {
-                    type: 'folder',
+                    type: 'subdir',
                     item: folder,
-                    iconClass: 'fa fa-folder',
                     displayName: 'Folder',
+                    iconClass: 'fa fa-folder',
                     inputName: 'folder',
-                    linkHref: `/drive/folder/${folder.id}`,
-                    linkTitle: `See folder details for ${folder.name}`,
+                    linkHref: grid.sharedFolder ? `/public/${sharedFolder.id}/folder/${folder.id}` : `/drive/folder/${folder.id}`,
+                    linkTitle: `Open folder ${folder.name}`,
                     updateAction: `/drive/folder/${folder.id}?_method=PUT`,
                     deleteAction: `/drive/folder/${folder.id}?_method=DELETE`,
-                    deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`
+                    deleteConfirmMessage: `Are you sure you want to delete the folder /${folder.name} ?\r\nThis action cannot be undone.`,
+                    showOptions: grid.enableActions
                 }) %>
             </li>
         <% }) %>
-        <!-- Files     -->
-        <% searchResults.files.forEach(file => { %>
+    <% }  %> 
+
+    <!-- Files     -->
+    <% if (grid.files) { %>
+        <% grid.files.forEach(file => { %>
             <li>
                 <%- include('../../components/card-with-actions', {
                     type: 'file',
@@ -26,30 +31,34 @@
                     iconClass: 'fa fa-file',
                     displayName: 'File',
                     inputName: 'file',
-                    linkHref: `/drive/folder/${file.parentFolderId}/file/${file.id}`,
+                    linkHref: grid.sharedFolder ? `/public/${sharedFolder.id}/folder/${file.parentFolderId}/file/${file.id}` : 
+                    `/drive/folder/${file.parentFolderId}/file/${file.id}`,
                     linkTitle: `See file details for ${file.name}`,
                     updateAction: `/drive/folder/${file.parentFolderId}/file/${file.id}?_method=PUT`,
                     deleteAction: `/drive/folder/${file.parentFolderId}/file/${file.id}?_method=DELETE`,
-                    deleteConfirmMessage: `Are you sure you want to delete the file /${file.name} ?\r\nThis action cannot be undone.`
+                    deleteConfirmMessage: `Are you sure you want to delete the file /${file.name} ?\r\nThis action cannot be undone.`,
+                    showOptions: grid.enableActions
                 }) %>
             </li>
         <% }) %>
-            <% if (!searchResults.files?.length && !searchResults.folders?.length ) { %>
-                <li class="col-span-full">
-                    <div
-                    class=" h-full w-full rounded-lg bg-white border border-violet-100 p-20 flex flex-col gap-2 items-center justify-center "
-                    >
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                            <i class="fa fa-search text-3xl text-gray-500"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-600">
-                            No matches yet
-                        </h2>
-                        <p class="text-gray-500 text-lg text-center">
-                            Try adjusting your filters or keywords!
-                        </p>
-                    </div>
-                </li>
-            <% } %>
-        <% }  %> 
+    <% } %>
+    
+    <!-- No search results placeholder -->
+    <% if ( !grid.files?.length && !grid.folders?.length ) { %>
+        <li class="col-span-full">
+            <div
+            class=" h-full w-full rounded-lg bg-white border border-violet-100 p-20 flex flex-col gap-2 items-center justify-center "
+            >
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fa fa-search text-3xl text-gray-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-600">
+                    No matches yet
+                </h2>
+                <p class="text-gray-500 text-lg text-center">
+                    Try adjusting your filters or keywords!
+                </p>
+            </div>
+        </li>
+    <% } %>
 </ul>

@@ -6,6 +6,7 @@ import connectLivereload from 'connect-livereload';
 import homeRouter from './routes/homeRouter';
 import userRouter from './routes/userRouter';
 import driveRouter from './routes/driveRouter';
+import publicRouter from './routes/publicRouter';
 import path from 'path';
 import 'dotenv/config';
 import passport from 'passport';
@@ -76,6 +77,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/public', publicRouter);
 app.use('/drive', driveRouter);
 app.use('/account', userRouter);
 app.use('/', homeRouter);

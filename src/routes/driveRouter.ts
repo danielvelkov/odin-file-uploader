@@ -39,6 +39,7 @@ driveRouter.delete(
 );
 
 // Folder related
+driveRouter.post('/folder/:id/share', driveController.postSubfolderShare);
 driveRouter.post('/folder/:id/create', driveController.postSubfolderCreate);
 driveRouter.post('/folder/create', driveController.postFolderCreate);
 driveRouter.get('/folder/:id', driveController.getFolder);

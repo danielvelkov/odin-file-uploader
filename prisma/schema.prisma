@@ -36,6 +36,7 @@ model Folder {
   updatedAt DateTime @updatedAt
   owner_id Int
   user User @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  shared SharedFolder[]
 }
 
 model File {
@@ -51,4 +52,18 @@ model File {
   owner_id Int
   user User @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   cloudinary_public_id String?
+}
+
+enum AccessType {
+  PREVIEW
+  PREVIEW_DOWNLOAD
+}
+
+model SharedFolder {
+  id String @id @default(uuid())
+  folderId Int
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  accessType AccessType @default(PREVIEW) 
 }

@@ -16,6 +16,9 @@ import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import fetch from 'node-fetch';
 import { LayoutType } from '../util/LayoutType';
+import { createUserDriveViewModel } from '../viewModels/UserDriveViewModel';
+import { createLinkCreatedViewModel } from '../viewModels/LinkCreatedViewModel';
+import { createUserSearchResultsViewModel } from '../viewModels/UserSearchResultsViewModel';
 
 interface FileRequest extends Request {
   fileValidationError?: string;
@@ -93,19 +96,40 @@ export const getDrive = async (
   try {
     const { alerts } = req.session;
     delete req.session.alerts;
-    const { layout } = req.query;
+    const { layout, shared } = req.query;
 
     if (layout) req.session.layoutType = layout as LayoutType;
 
     const rootFolders = await getUserRootFolders(+(req.user as User).id);
-    res.render('drive', {
+
+    const commonViewProps: Parameters<typeof createUserDriveViewModel>[0] = {
       title: 'My drive',
-      folders: rootFolders,
       alerts: alerts
         ? alerts.map((a) => new Alert(a.type, a.title, a.message))
         : [],
       layout: req.session.layoutType ?? 'grid',
-    });
+      features: {
+        canDeleteFile: false, // can't as there are no files in root
+        canRenameFile: false, // can't as there are no files in root
+        showShareFolder: false, // can't share root as it does not exist
+        showUploadFile: false, // can't upload to root as it does not exist
+        canGoBack: false, // can't as this is the root level
+      },
+      urls: {
+        parentFolderLink: '/drive',
+      },
+      rootFolders,
+      currentUser: req.user as User,
+    };
+
+    const viewModel = shared
+      ? createLinkCreatedViewModel({
+          ...commonViewProps,
+          createdSharedFolderLink: `${req.protocol}://${req.get('host')}/public/${shared}`,
+        })
+      : createUserDriveViewModel(commonViewProps);
+
+    res.render('drive', viewModel);
   } catch (error) {
     console.error(error);
     next(error);
@@ -114,7 +138,7 @@ export const getDrive = async (
 
 /**
  * Displays search results for a given query.
- * @route GET /drive/search
+ * @route GET /drive/search?q=*
  */
 export const getDriveSearch = [
   check('q')
@@ -163,19 +187,27 @@ export const getDriveSearch = [
 
       const rootFolders = await getUserRootFolders(+(req.user as User).id);
 
-      res.render('search', {
-        title: 'Search result for: ' + searchTerm,
-        folders: rootFolders,
-        searchResults: {
-          files: fileResults,
-          folders: folderResults,
-        },
+      const viewModel = createUserSearchResultsViewModel({
+        searchTerm: searchTerm as string,
+        title: `Search results for: ${searchTerm}`,
         alerts: alerts
           ? alerts.map((a) => new Alert(a.type, a.title, a.message))
           : [],
         layout: req.session.layoutType ?? 'grid',
-        searchTerm,
+        actions: {
+          changeToGrid: `/drive/search?q=${searchTerm}&layout=grid`,
+          changeToList: `/drive/search?q=${searchTerm}&layout=list`,
+          search: '/drive/search',
+        },
+        rootFolders,
+        results: {
+          files: fileResults,
+          folders: folderResults,
+        },
+        currentUser: req.user as User,
       });
+
+      return res.render('search', viewModel);
     } catch (error) {
       console.error(error);
       next(error);
@@ -342,15 +374,45 @@ export const getFolder = async (
 
     if (!folder) return next(new Error404('Folder does not exist'));
 
-    return res.render('drive', {
-      title: folder.name,
-      folders: await getUserRootFolders(+(req.user as User).id),
-      currentFolder: folder,
+    const viewModel = createUserDriveViewModel({
+      title: `/${folder.name}`,
       alerts: alerts
         ? alerts.map((a) => new Alert(a.type, a.title, a.message))
         : [],
       layout: req.session.layoutType ?? 'grid',
+      features: {
+        canDeleteFile: true,
+        canDeleteFolder: true,
+        canRenameFile: true,
+        canRenameFolder: true,
+        showCreateFolder: true,
+        showOptions: true,
+        showRootFolders: true,
+        showSearch: true,
+        showShareFolder: true,
+        showUploadFile: true,
+        canGoBack: true,
+      },
+      actions: {
+        changeToGrid: `/drive/folder/${folder.id}?layout=grid`,
+        changeToList: `/drive/folder/${folder.id}?layout=list`,
+        createFolder: `/drive/folder/${folder.id}/create`,
+        search: '/drive/search',
+        shareFolder: `/drive/folder/${folder.id}/share`,
+        uploadFile: `/drive/folder/${folder.id}/upload`,
+      },
+      urls: {
+        rootFolderLink: '/drive',
+        parentFolderLink: folder.parentFolderId
+          ? `/drive/folder/${folder.parentFolderId}`
+          : '/drive',
+      },
+      currentFolder: folder,
+      rootFolders: await getUserRootFolders(+(req.user as User).id),
+      currentUser: req.user as User,
     });
+
+    return res.render('drive', viewModel);
   } catch (error) {
     console.log(error);
     next(error);
@@ -615,6 +677,81 @@ export const updateFolderName = [
           ? `/drive/folder/${folderForUpdate.parentFolderId}`
           : '/drive',
       );
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+];
+
+/**
+ * Create a sharable folder link
+ * @route POST /drive/folder/:id/share
+ */
+export const postSubfolderShare = [
+  check('id')
+    .notEmpty()
+    .isNumeric()
+    .withMessage('Folder Id route param not provided'),
+  check('linkExpireAt')
+    .isISO8601()
+    .toDate()
+    .withMessage('Duration provided is not a valid date')
+    .custom((value) => {
+      const inputDate = new Date(value);
+      if (inputDate <= new Date()) {
+        throw new Error('Date must be in the future');
+      }
+      return true;
+    }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        const alerts = errors
+          .array()
+          .map((e) => new Alert('error', 'Failed to share folder', e.msg));
+
+        req.session.alerts = alerts;
+
+        return res.redirect('/drive');
+      }
+
+      const { id } = req.params;
+      const folderToBeShared = await prisma.folder.findFirst({
+        where: {
+          id: +id,
+          owner_id: (req.user as User).id,
+        },
+      });
+
+      if (!folderToBeShared) {
+        const alert = new Alert(
+          'error',
+          'Failed to share folder',
+          'Folder does not exist',
+        );
+
+        req.session.alerts = [alert];
+
+        return res.redirect(`/drive`);
+      }
+
+      const { linkExpireAt, accessType } = req.body;
+
+      const sharedFolder = await prisma.sharedFolder.create({
+        data: {
+          folderId: +id,
+          expiresAt: linkExpireAt,
+          accessType,
+        },
+      });
+
+      const alert = new Alert('success', 'Shared folder link created', '');
+      req.session.alerts = [alert];
+
+      return res.redirect(`/drive?shared=${sharedFolder.id}`);
     } catch (error) {
       console.log(error);
       next(error);
